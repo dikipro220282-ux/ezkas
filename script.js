@@ -1,15 +1,17 @@
+import exams from './data/exams.js';
+
 let questions = [];
 let current = 0;
 let score = 0;
 
 window.loadExam = function(name){
 
-const exam = exams.find(item => item.id === name);
+  const exam = exams.find(item => item.id === name);
 
-if(!exam){
-alert("Экзамен не найден");
-return;
-}
+  if(!exam){
+    alert("Экзамен не найден");
+    return;
+  }
 
 questions = [...exam.questions];
 questions.sort(() => Math.random() - 0.5);

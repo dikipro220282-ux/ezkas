@@ -1,12 +1,15 @@
+import informatics from './informatics.js';
+import programming from './programming.js';
+
 const exams = [
   {
     id: "informatics",
-    title: "Информатика",
     questions: informatics
   },
   {
     id: "programming",
-    title: "Алгоритмдеу және бағдарламалау",
     questions: programming
   }
 ];
+
+export default exams;
