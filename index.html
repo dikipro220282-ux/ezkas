@@ -79,9 +79,37 @@ if (document.characterSet !== 'UTF-8' && document.characterSet !== 'utf-8') {
 
 </div>
 
-<script src="data/informatics.js"></script>
-<script src="data/programming.js"></script>
-<script src="script.js"></script>
+<script>
+// Последовательная загрузка данных: сохраняем временную `questions`
+// из каждого файла в уникальную глобальную переменную, не меняя содержимого файлов.
+function loadData(src, assignName, cb) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = function(){
+        try {
+            if (typeof window.questions !== 'undefined') {
+                window[assignName] = window.questions;
+                try { delete window.questions; } catch(e) { window.questions = undefined; }
+            } else {
+                window[assignName] = [];
+            }
+        } catch(e) {
+            window[assignName] = [];
+        }
+        cb();
+    };
+    s.onerror = function(){ window[assignName]=[]; cb(); };
+    document.body.appendChild(s);
+}
+
+loadData('data/informatics.js','questions_informatics', function(){
+    loadData('data/programming.js','questions_programming', function(){
+        var s = document.createElement('script');
+        s.src = 'script.js';
+        document.body.appendChild(s);
+    });
+});
+</script>
 
 </body>
 </html>
