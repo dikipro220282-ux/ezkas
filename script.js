@@ -171,31 +171,29 @@ window.reviewWrong = function() {
   showQuestion();
 };
 
-document.addEventListener('DOMContentLoaded', function() {
-  const nextBtn = document.getElementById("nextBtn");
-  if(nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      current++;
+window.nextQuestion = function() {
 
-      if(current >= questions.length) {
-        document.getElementById("quiz").style.display = "none";
-        document.getElementById("results").style.display = "block";
+  current++;
 
-        const percent = Math.round((score / questions.length) * 100);
-        document.getElementById("resultName").innerText = userName;
-        document.getElementById("resultScore").innerText = score;
-        document.getElementById("resultTotal").innerText = questions.length;
-        document.getElementById("resultPercent").innerText = percent;
-        document.getElementById("resultStreak").innerText = maxStreak;
+  if(current >= questions.length) {
 
-        if(wrongAnswers.length > 0 && !isReviewMode) {
-          document.getElementById("wrongAnswersSection").style.display = "block";
-        }
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("results").style.display = "block";
 
-        return;
-      }
+    const percent = Math.round((score / questions.length) * 100);
 
-      showQuestion();
-    });
+    document.getElementById("resultName").innerText = userName;
+    document.getElementById("resultScore").innerText = score;
+    document.getElementById("resultTotal").innerText = questions.length;
+    document.getElementById("resultPercent").innerText = percent;
+    document.getElementById("resultStreak").innerText = maxStreak;
+
+    if(wrongAnswers.length > 0 && !isReviewMode) {
+      document.getElementById("wrongAnswersSection").style.display = "block";
+    }
+
+    return;
   }
-});
+
+  showQuestion();
+};
