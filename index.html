@@ -86,13 +86,52 @@ function loadAndExtract(src, assignName) {
     return fetch(src)
         .then(function(res){ if(!res.ok) throw new Error('fetch failed'); return res.text(); })
         .then(function(text){
-            try {
-                var fn = new Function(text + '\nreturn (typeof questions !== "undefined") ? questions : [];');
-                var q = fn();
-                window[assignName] = Array.isArray(q) ? q : [];
-            } catch(e) {
-                window[assignName] = [];
-            }
+            // Попробуем загрузить как модуль — это поддержит `export default` и ограничит область видимости.
+            // Убираем возможные экспорты из исходного текста, чтобы не получить дублирующие `export`
+            var cleaned = text.replace(/export\s+default[\s\S]*$/i, '');
+            var moduleText = cleaned + '\n\nwindow.__MODULE_TEMP = (typeof questions !== "undefined" ? questions : (typeof questions_programming !== "undefined" ? questions_programming : (typeof questions_informatics !== "undefined" ? questions_informatics : [])));';
+            var blob = new Blob([moduleText], { type: 'text/javascript' });
+            var url = URL.createObjectURL(blob);
+            return new Promise(function(resolve){
+                var scriptEl = document.createElement('script');
+                scriptEl.type = 'module';
+                scriptEl.src = url;
+                var settled = false;
+                scriptEl.onload = function(){
+                    try {
+                        var q = window.__MODULE_TEMP || [];
+                        window[assignName] = Array.isArray(q) ? q : [];
+                        delete window.__MODULE_TEMP;
+                        console.log('loaded (moduleTag)', src, assignName, '=>', window[assignName].length);
+                    } catch(e) {
+                        console.error('moduleTag evaluate error', src, e);
+                        window[assignName] = [];
+                    }
+                    settled = true;
+                    URL.revokeObjectURL(url);
+                    scriptEl.remove();
+                    resolve();
+                };
+                scriptEl.onerror = function(){
+                    // fallback to eval
+                    try {
+                        var fn = new Function(text + '\nreturn (typeof questions !== "undefined") ? questions : [];');
+                        var q = fn();
+                        window[assignName] = Array.isArray(q) ? q : [];
+                        console.log('loaded (eval)', src, assignName, '=>', window[assignName].length);
+                    } catch(e) {
+                        console.error('evaluate error', src, e);
+                        window[assignName] = [];
+                    }
+                    settled = true;
+                    URL.revokeObjectURL(url);
+                    scriptEl.remove();
+                    resolve();
+                };
+                document.body.appendChild(scriptEl);
+                // safety: if neither onload/onerror fired in 2s, fallback
+                setTimeout(function(){ if(!settled){ try{ var fn = new Function(text + '\nreturn (typeof questions !== "undefined") ? questions : [];'); var q = fn(); window[assignName] = Array.isArray(q)?q:[]; console.log('loaded (timeout-eval)', src, assignName, '=>', window[assignName].length);}catch(e){console.error('evaluate timeout error', src, e); window[assignName]=[];} URL.revokeObjectURL(url); scriptEl.remove(); resolve(); } }, 2000);
+            });
         })
         .catch(function(){ window[assignName]=[]; });
 }
