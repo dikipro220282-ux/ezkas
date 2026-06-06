@@ -610,5 +610,3 @@ answers:["[] Т›РѕР»РґР°РЅСѓ","** Т›РѕР»РґР°РЅСѓ","
 correct:2
 }
 ];
-
-export default questions;

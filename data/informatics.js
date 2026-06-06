@@ -1145,5 +1145,3 @@ answers: [
 correct: 1
 }
 ];
-
-export default questions;
