@@ -99,6 +99,7 @@ function showQuestion() {
   });
 
   document.getElementById("backBtn").disabled = current === 0;
+  document.getElementById("nextBtn").disabled = answered[current] === undefined;
 }
 
 function checkAnswer(btn, index) {
@@ -108,6 +109,7 @@ function checkAnswer(btn, index) {
 
   buttons.forEach(b => b.disabled = true);
   answered[current] = index;
+  document.getElementById("nextBtn").disabled = false;
 
   if(index === correct) {
     btn.classList.add("correct");
