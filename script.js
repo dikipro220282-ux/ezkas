@@ -1,5 +1,3 @@
-import exams from './data/exams.js';
-
 let allQuestions = [];
 let questions = [];
 let currentExamId = null;
@@ -12,11 +10,22 @@ let answered = {};
 let wrongAnswers = [];
 let isReviewMode = false;
 
+const exams = [
+  {
+    id: "informatics",
+    questions: typeof questions_informatics !== 'undefined' ? questions_informatics : []
+  },
+  {
+    id: "programming",
+    questions: typeof questions_programming !== 'undefined' ? questions_programming : []
+  }
+];
+
 window.loadExam = function(name) {
   const exam = exams.find(item => item.id === name);
 
-  if(!exam) {
-    alert("Экзамен не найден");
+  if(!exam || exam.questions.length === 0) {
+    alert("Экзамен не найден или нет вопросов");
     return;
   }
 
@@ -138,9 +147,7 @@ window.reviewWrong = function() {
     return;
   }
 
-  questions = wrongAnswers.map(i => allQuestions.find((q, idx) => 
-    allQuestions.indexOf(q) === i
-  )).filter(Boolean);
+  questions = wrongAnswers.map(i => allQuestions[i]).filter(Boolean);
   
   current = 0;
   score = 0;
@@ -157,26 +164,31 @@ window.reviewWrong = function() {
   showQuestion();
 };
 
-document.getElementById("nextBtn")?.addEventListener("click", () => {
-  current++;
+document.addEventListener('DOMContentLoaded', function() {
+  const nextBtn = document.getElementById("nextBtn");
+  if(nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      current++;
 
-  if(current >= questions.length) {
-    document.getElementById("quiz").style.display = "none";
-    document.getElementById("results").style.display = "block";
+      if(current >= questions.length) {
+        document.getElementById("quiz").style.display = "none";
+        document.getElementById("results").style.display = "block";
 
-    const percent = Math.round((score / questions.length) * 100);
-    document.getElementById("resultName").innerText = userName;
-    document.getElementById("resultScore").innerText = score;
-    document.getElementById("resultTotal").innerText = questions.length;
-    document.getElementById("resultPercent").innerText = percent;
-    document.getElementById("resultStreak").innerText = maxStreak;
+        const percent = Math.round((score / questions.length) * 100);
+        document.getElementById("resultName").innerText = userName;
+        document.getElementById("resultScore").innerText = score;
+        document.getElementById("resultTotal").innerText = questions.length;
+        document.getElementById("resultPercent").innerText = percent;
+        document.getElementById("resultStreak").innerText = maxStreak;
 
-    if(wrongAnswers.length > 0 && !isReviewMode) {
-      document.getElementById("wrongAnswersSection").style.display = "block";
-    }
+        if(wrongAnswers.length > 0 && !isReviewMode) {
+          document.getElementById("wrongAnswersSection").style.display = "block";
+        }
 
-    return;
+        return;
+      }
+
+      showQuestion();
+    });
   }
-
-  showQuestion();
 });
