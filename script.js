@@ -10,6 +10,11 @@ let answered = {};
 let wrongAnswers = [];
 let isReviewMode = false;
 
+// Проверяем загрузку данных
+console.log('Script loaded');
+console.log('questions_informatics:', typeof questions_informatics !== 'undefined' ? 'OK' : 'MISSING');
+console.log('questions_programming:', typeof questions_programming !== 'undefined' ? 'OK' : 'MISSING');
+
 const exams = [
   {
     id: "informatics",
