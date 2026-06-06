@@ -1,102 +1,182 @@
 import exams from './data/exams.js';
 
+let allQuestions = [];
 let questions = [];
+let currentExamId = null;
+let userName = '';
 let current = 0;
 let score = 0;
+let maxStreak = 0;
+let currentStreak = 0;
+let answered = {};
+let wrongAnswers = [];
+let isReviewMode = false;
 
-window.loadExam = function(name){
-
+window.loadExam = function(name) {
   const exam = exams.find(item => item.id === name);
 
-  if(!exam){
+  if(!exam) {
     alert("Экзамен не найден");
     return;
   }
 
-questions = [...exam.questions];
-questions.sort(() => Math.random() - 0.5);
+  currentExamId = name;
+  allQuestions = [...exam.questions];
+  
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("nameForm").style.display = "block";
+};
 
-current = 0;
-score = 0;
+window.startQuiz = function() {
+  userName = document.getElementById("userName").value.trim();
+  
+  if(!userName) {
+    alert("Пожалуйста, введи своё имя");
+    return;
+  }
 
-document.getElementById("menu").style.display = "none";
-document.getElementById("quiz").style.display = "block";
+  questions = [...allQuestions];
+  questions.sort(() => Math.random() - 0.5);
+  
+  current = 0;
+  score = 0;
+  maxStreak = 0;
+  currentStreak = 0;
+  answered = {};
+  wrongAnswers = [];
+  isReviewMode = false;
 
-showQuestion();
+  document.getElementById("nameForm").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+  document.getElementById("total").innerText = questions.length;
+
+  showQuestion();
+};
+
+function showQuestion() {
+  const q = questions[current];
+
+  document.getElementById("question").innerText = q.question;
+  document.getElementById("current").innerText = current + 1;
+  document.getElementById("scoreShow").innerText = score;
+  document.getElementById("streak").innerText = currentStreak;
+
+  const answers = document.getElementById("answers");
+  answers.innerHTML = "";
+
+  q.answers.forEach((answer, index) => {
+    const btn = document.createElement("button");
+    btn.className = "answer";
+    btn.innerText = answer;
+
+    if(answered[current] !== undefined) {
+      btn.disabled = true;
+      if(index === q.correct) {
+        btn.classList.add("correct");
+      }
+      if(answered[current] === index && index !== q.correct) {
+        btn.classList.add("wrong");
+      }
+    } else {
+      btn.onclick = () => checkAnswer(btn, index);
+    }
+
+    answers.appendChild(btn);
+  });
+
+  document.getElementById("backBtn").disabled = current === 0;
 }
 
-function showQuestion(){
+function checkAnswer(btn, index) {
+  const q = questions[current];
+  const correct = q.correct;
+  const buttons = document.querySelectorAll(".answer");
 
-const q = questions[current];
+  buttons.forEach(b => b.disabled = true);
+  answered[current] = index;
 
-document.getElementById("question").innerText =
-q.question;
+  if(index === correct) {
+    btn.classList.add("correct");
+    score++;
+    currentStreak++;
+    maxStreak = Math.max(maxStreak, currentStreak);
+  } else {
+    btn.classList.add("wrong");
+    currentStreak = 0;
+    wrongAnswers.push(current);
+    
+    if(buttons[correct]) {
+      buttons[correct].classList.add("correct");
+    }
+  }
 
-document.getElementById("progress").innerText =
-`${current + 1} / ${questions.length}`;
-
-const answers = document.getElementById("answers");
-
-answers.innerHTML = "";
-
-q.answers.forEach((answer,index)=>{
-
-const btn = document.createElement("button");
-
-btn.className = "answer";
-
-btn.innerText = answer;
-
-btn.onclick = () => checkAnswer(btn,index);
-
-answers.appendChild(btn);
-
-});
+  document.getElementById("scoreShow").innerText = score;
+  document.getElementById("streak").innerText = currentStreak;
 }
 
-function checkAnswer(btn,index){
+window.previousQuestion = function() {
+  if(current > 0) {
+    current--;
+    showQuestion();
+  }
+};
 
-const correct = questions[current].correct;
+window.backToMenu = function() {
+  document.getElementById("menu").style.display = "block";
+  document.getElementById("nameForm").style.display = "none";
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("results").style.display = "none";
+};
 
-const buttons =
-document.querySelectorAll(".answer");
+window.retakeExam = function() {
+  loadExam(currentExamId);
+};
 
-buttons.forEach(b => b.disabled = true);
+window.reviewWrong = function() {
+  if(wrongAnswers.length === 0) {
+    alert("Нет ошибок для повторения!");
+    return;
+  }
 
-if(index === correct){
+  questions = wrongAnswers.map(i => allQuestions.find((q, idx) => 
+    allQuestions.indexOf(q) === i
+  )).filter(Boolean);
+  
+  current = 0;
+  score = 0;
+  maxStreak = 0;
+  currentStreak = 0;
+  answered = {};
+  wrongAnswers = [];
+  isReviewMode = true;
 
-btn.classList.add("correct");
-score++;
+  document.getElementById("results").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+  document.getElementById("total").innerText = questions.length;
 
-}else{
+  showQuestion();
+};
 
-btn.classList.add("wrong");
+document.getElementById("nextBtn")?.addEventListener("click", () => {
+  current++;
 
-if(buttons[correct]){
-buttons[correct].classList.add("correct");
-}
+  if(current >= questions.length) {
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("results").style.display = "block";
 
-}
-}
+    const percent = Math.round((score / questions.length) * 100);
+    document.getElementById("resultName").innerText = userName;
+    document.getElementById("resultScore").innerText = score;
+    document.getElementById("resultTotal").innerText = questions.length;
+    document.getElementById("resultPercent").innerText = percent;
+    document.getElementById("resultStreak").innerText = maxStreak;
 
-document.getElementById("nextBtn")
-.addEventListener("click",()=>{
+    if(wrongAnswers.length > 0 && !isReviewMode) {
+      document.getElementById("wrongAnswersSection").style.display = "block";
+    }
 
-current++;
+    return;
+  }
 
-if(current >= questions.length){
-
-document.getElementById("quiz").innerHTML = `
-<h2>Экзамен завершён</h2>
-<h3>${score} из ${questions.length}</h3>
-<button onclick="location.reload()">
-На главную
-</button>
-`;
-
-return;
-}
-
-showQuestion();
-
+  showQuestion();
 });

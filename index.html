@@ -14,28 +14,61 @@
 <h1>Экзаменационная система</h1>
 <p class="subtitle">Выбери тему и начни тестирование — отличная тренировка перед экзаменом.</p>
 
-<div id="menu">
+<div id="menu" class="menu-container">
     <button onclick="loadExam('informatics')">
-        Информатика
+        📚 Информатика
     </button>
 
     <button onclick="loadExam('programming')">
-        Алгоритмдеу және бағдарламалау
+        💻 Алгоритмдеу және бағдарламалау
     </button>
 </div>
 
-<div id="quiz" style="display:none">
+<div id="nameForm" style="display:none" class="form-container">
+    <h2>Заполни данные</h2>
+    <input type="text" id="userName" placeholder="Введи своё имя" maxlength="100">
+    <button onclick="startQuiz()" class="btn-start">Начать тест 🚀</button>
+    <button onclick="backToMenu()" class="btn-back">← Назад</button>
+</div>
+
+<div id="quiz" style="display:none" class="quiz-container">
+
+<div class="quiz-header">
+    <div>Вопрос <span id="current">1</span>/<span id="total">0</span></div>
+    <div>Баллов: <span id="scoreShow">0</span></div>
+    <div>🔥 Стрик: <span id="streak">0</span></div>
+</div>
 
 <h2 id="question"></h2>
 
 <div id="answers"></div>
 
-<button id="nextBtn">
-    Следующий вопрос
-</button>
+<div class="quiz-buttons">
+    <button id="backBtn" onclick="previousQuestion()" class="btn-back">← Назад</button>
+    <button id="nextBtn">Следующий →</button>
+    <button id="exitBtn" onclick="backToMenu()" class="btn-exit">🚪 Выход</button>
+</div>
 
 <p id="progress"></p>
 
+</div>
+
+<div id="results" style="display:none" class="results-container">
+    <div class="result-card">
+        <h2>🎉 Тест завершён!</h2>
+        <div class="result-info">
+            <p><strong>Имя:</strong> <span id="resultName"></span></p>
+            <p><strong>Баллы:</strong> <span id="resultScore"></span> / <span id="resultTotal"></span></p>
+            <p><strong>Процент:</strong> <span id="resultPercent"></span>%</p>
+            <p><strong>Макс стрик:</strong> 🔥 <span id="resultStreak"></span></p>
+        </div>
+        <div id="wrongAnswersSection" style="display:none">
+            <h3>❌ Вопросы на ошибки:</h3>
+            <button onclick="reviewWrong()" class="btn-review">Повторить неправильные ответы 📝</button>
+        </div>
+        <button onclick="backToMenu()" class="btn-restart">← Вернуться в меню</button>
+        <button onclick="retakeExam()" class="btn-retake">🔄 Пройти ещё раз</button>
+    </div>
 </div>
 
 </div>
